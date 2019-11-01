@@ -58,12 +58,21 @@ io.on('connection', socket => {
 		}
 		roomList[room].checkerboardStatus[rowIndex][columnIndex] = play
 		io.to(room).emit('updateChess', roomList[room].checkerboardStatus)
-		if (hasWin()) {
-			io.to(room).emit('gameResult', );
-		} else {
-			roomList[room].nowPlayer = changePlayer(roomList[room].nowPlayer)
-			io.to(room).emit('nowPlay', roomList[room].nowPlayer)
+		
+		if (isWin(PLAY_1, roomList[room].checkerboardStatus)) {
+			io.to(room).emit('gameResult', PLAY_1);
+			return 
+		} 
+		if(isWin(PLAY_2, roomList[room].checkerboardStatus)) {
+			io.to(room).emit('gameResult', PLAY_2);
+			return 
 		}
+		if(isFlat(roomList[room].checkerboardStatus)) {
+			io.to(room).emit('gameResult', 'flat');
+			return 
+		}
+		roomList[room].nowPlayer = changePlayer(roomList[room].nowPlayer)
+		io.to(room).emit('nowPlay', roomList[room].nowPlayer)
 	})
 
 	socket.on('disconnect', (reason) => {
@@ -106,6 +115,34 @@ function changePlayer(play) {
 	}
 }
 
-function hasWin() {
-	return false;
+function isWin(play, checkerboard) {
+	let isWin = false;
+
+	checkerboard.forEach((row , index) => {
+		// row win
+		if (row.every(item => item === play)) {
+			isWin = true;
+		}
+		// column win
+		if (checkerboard[0][index] === play && checkerboard[0][index] === checkerboard[1][index] && checkerboard[1][index] === checkerboard[2][index]) {
+			isWin = true;
+		}
+	});
+	// oblique win
+	if (checkerboard[1][1] === play) {
+		if (checkerboard[1][1] === checkerboard[0][2] && checkerboard[1][1] === checkerboard[2][0]) {
+			isWin = true;
+		}
+		if (checkerboard[1][1] === checkerboard[0][0] && checkerboard[1][1] === checkerboard[2][2]) {
+			isWin = true;
+		}
+	}
+
+	return isWin;
+}
+
+function isFlat() {
+	return checkerboard.every(row => (
+		row.every(column => column)
+	));
 }
