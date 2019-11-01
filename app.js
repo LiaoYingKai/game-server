@@ -77,12 +77,9 @@ io.on('connection', socket => {
 
 	socket.on('disconnect', (reason) => {
 		socket.leave(room)
-		const index = roomList[room].peopleOfRoom.indexOf(socketID)
-		roomList[room].peopleOfRoom.splice(index, 1)
 		io.to(room).emit('leaveGame')
-		if(roomList[room].numOfPeople === 0) {
-			delete roomList[room]
-		}
+		io.to(room).emit('updateChess', initCheckerbord())
+		delete roomList[room]
 		console.log(roomList)
 	})
 })
@@ -105,6 +102,11 @@ function initRoom() {
 			return this.peopleOfRoom.length
 		}
 	}
+}
+function initCheckerbord() {
+	const checkerboard = [['','',''],['','',''],['','',''],];
+
+	return checkerboard.map(row => row.map(item => item));
 }
 
 function changePlayer(play) {
@@ -141,7 +143,7 @@ function isWin(play, checkerboard) {
 	return isWin;
 }
 
-function isFlat() {
+function isFlat(checkerboard) {
 	return checkerboard.every(row => (
 		row.every(column => column)
 	));
