@@ -1,8 +1,10 @@
 const express = require('express')
 const app = express()
 
+const port = process.env.PORT || 3000;
+
 const server = require('http').Server(app)
-	.listen(8888, () => {console.log('open Server')})
+	.listen(port, () => {console.log('open Server')})
 
 const io = require('socket.io')(server)
 const roomList = {}
