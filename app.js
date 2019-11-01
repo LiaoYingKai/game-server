@@ -6,6 +6,14 @@ const server = require('http').Server(app)
 
 const io = require('socket.io')(server)
 const roomList = {}
+const PlayEnums = {
+	PLAY_1: 'o',
+	PLAY_2: 'x',
+}
+const {
+	PLAY_1,
+	PLAY_2
+} = PlayEnums
 
 io.on('connection', socket => {
 	console.log('connection')
@@ -15,23 +23,43 @@ io.on('connection', socket => {
 	
 	if(joinOrCreate()) {
 		socket.join(room, () => {
-			roomList[room].push(socketID)
-			if(roomList[room].length === 2) {
+			const { peopleOfRoom, nowPlayer, } = roomList[room]
+			peopleOfRoom.push(socketID)
+			if(peopleOfRoom.length === 2) {
 				io.to(room).emit('startGame')
-				console.log(roomList)
+				io.to(peopleOfRoom[0]).emit('PLAY_1')
+				io.to(peopleOfRoom[1]).emit('PLAY_2')
+				roomList[room].nowPlayer = changePlayer(nowPlayer)
+				io.to(room).emit('nowPlay', nowPlayer)
+				
 			}
+			console.log(roomList)
 		})
 	} else {
 		socket.join(room, () => {
-			roomList[room] = [socketID]
+			roomList[room] = initRoom()
+			roomList[room].peopleOfRoom.push(socketID)
 			console.log(roomList)
 		})
 	}
 
+	socket.on('addChess', (chess) => {
+		console.log(chess)
+		socket.emit('updateChess',() => {
+			// 更新棋盤
+		});
+		socket.emit('errorAdd', () => {
+			// 不能下的地方
+		});
+		socket.emit('gameResult', () => {
+			// 不能下的地方
+		});
+	})
+
 	socket.on('disconnect', (reason) => {
 		socket.leave(room)
-		const index = roomList[room].indexOf(socketID)
-		roomList[room].splice(index, 1)
+		const index = roomList[room].peopleOfRoom.indexOf(socketID)
+		roomList[room].peopleOfRoom.splice(index, 1)
 		io.to(room).emit('leaveGame')
 		console.log(roomList)
 	})
@@ -43,5 +71,24 @@ function getRoomName() {
 }
 
 function joinOrCreate() {
-	return Object.keys(roomList).filter(key => roomList[key].length < 2)[0]
+	return Object.keys(roomList).filter(key => roomList[key].numOfPeople < 2)[0]
+}
+
+function initRoom() {
+	return {
+		peopleOfRoom: [],
+		nowPlayer: 0,
+		checkerboardStatus: [['','',''],['','',''],['','',''],],
+		get numOfPeople() {
+			return this.peopleOfRoom.length
+		}
+	}
+}
+
+function changePlayer(play) {
+	if(play === PLAY_1) {
+		return PLAY_2
+	} else {
+		return PLAY_1
+	}
 }
