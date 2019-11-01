@@ -30,8 +30,7 @@ io.on('connection', socket => {
 				io.to(peopleOfRoom[0]).emit('PLAY_1')
 				io.to(peopleOfRoom[1]).emit('PLAY_2')
 				roomList[room].nowPlayer = changePlayer(nowPlayer)
-				io.to(room).emit('nowPlay', nowPlayer)
-				
+				io.to(room).emit('nowPlay', roomList[room].nowPlayer)
 			}
 			console.log(roomList)
 		})
@@ -43,17 +42,28 @@ io.on('connection', socket => {
 		})
 	}
 
-	socket.on('addChess', (chess) => {
-		console.log(chess)
-		socket.emit('updateChess',() => {
-			// 更新棋盤
-		});
-		socket.emit('errorAdd', () => {
-			// 不能下的地方
-		});
-		socket.emit('gameResult', () => {
-			// 不能下的地方
-		});
+	socket.on('addChess', (chessInfo) => {
+		const {
+			play,
+			rowIndex,
+			columnIndex
+		} = chessInfo
+		if(play !== roomList[room].nowPlayer) {
+			socket.emit('notNowPlay', '想偷吃步餒乾');
+			return 
+		}
+		if(roomList[room].checkerboardStatus[rowIndex][columnIndex]) {
+			socket.emit('multipleAdd', '沒看到有人下了喔乾');
+			return
+		}
+		roomList[room].checkerboardStatus[rowIndex][columnIndex] = play
+		io.to(room).emit('updateChess', roomList[room].checkerboardStatus)
+		if (hasWin()) {
+			io.to(room).emit('gameResult', );
+		} else {
+			roomList[room].nowPlayer = changePlayer(roomList[room].nowPlayer)
+			io.to(room).emit('nowPlay', roomList[room].nowPlayer)
+		}
 	})
 
 	socket.on('disconnect', (reason) => {
@@ -61,6 +71,9 @@ io.on('connection', socket => {
 		const index = roomList[room].peopleOfRoom.indexOf(socketID)
 		roomList[room].peopleOfRoom.splice(index, 1)
 		io.to(room).emit('leaveGame')
+		if(roomList[room].numOfPeople === 0) {
+			delete roomList[room]
+		}
 		console.log(roomList)
 	})
 })
@@ -91,4 +104,8 @@ function changePlayer(play) {
 	} else {
 		return PLAY_1
 	}
+}
+
+function hasWin() {
+	return false;
 }
