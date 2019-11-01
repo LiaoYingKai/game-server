@@ -75,6 +75,10 @@ io.on('connection', socket => {
 		io.to(room).emit('nowPlay', roomList[room].nowPlayer)
 	})
 
+	socket.on('init', () => {
+		socket.emit('init', initCheckerbord())
+	})
+
 	socket.on('disconnect', (reason) => {
 		socket.leave(room)
 		io.to(room).emit('leaveGame')
