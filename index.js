@@ -8,5 +8,5 @@ const server = app.listen(port, () => {console.log('open Server')})
 const io = require('socket.io')(server)
 
 app.use(cors());
-require('./TicTacToc')(io)
-// require('./Gomoku')(io)
+require('./TicTacToc')(io.of('/tic-tac-toc'))
+require('./Gomoku')(io.of('/gomoku'))
