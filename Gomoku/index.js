@@ -120,6 +120,8 @@ function leftOblique(i, j) {
 
 module.exports = function(io) {
 	io.on('connection', function(socket) {
+		console.log('connection Gomoku server')
+
 		playId.push(socket.id)
 		console.log(playId)
 		if (playId.length === 2) {
