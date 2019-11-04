@@ -1,6 +1,3 @@
-
-var status
-var checkerbords
 var playId = []
 var player = 0
 var chess = 'o'
@@ -121,21 +118,22 @@ function leftOblique(i, j) {
 module.exports = function(io) {
 	io.on('connection', function(socket) {
 		console.log('connection Gomoku server')
+		const socketID = socket.id;
+		console.log(socketID)
 
-		playId.push(socket.id)
-		console.log(playId)
+		playId.push(socketID)
 		if (playId.length === 2) {
 			checkerboard = createCheckerboard()
 			socket.broadcast.to(playId[player]).emit('changeYou', true);
 		}
-		socket.on('putChess', (i, j) => {
-			if (playId[player] === socket.id) {
+		socket.on('addChess', (i, j) => {
+			if (playId[player] === socketID) {
 				if (checkerboard[i][j] === 0) {
-					console.log(socket.id, i, j)
-					io.emit('drawChess', i, j)
+					console.log(socketID, i, j)
+					io.emit('updateChess', i, j)
 					checkerboard[i][j] = chess
 					if (isWin(i, j)) {
-						io.emit('winner', chess)
+						io.emit('gameResult', chess)
 						console.log(chess + " is winner")
 						player = 0
 						chess = 'o'
@@ -147,8 +145,8 @@ module.exports = function(io) {
 				}
 			}
 		})
-		socket.on('disconnect', function(hello) {
-			playId.splice(playId.indexOf(socket.id), 1)
+		socket.on('disconnect', function() {
+			playId.splice(playId.indexOf(socketID), 1)
 			console.log(playId)
 			chess = 'o'
 			player = 0
