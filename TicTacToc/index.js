@@ -1,20 +1,14 @@
+const { PlayEnums } = require('../enums');
+const {
+	getRoomName,
+	joinOrCreate,
+	changePlayer,
+} = require('../lib');
 const roomList = {}
-const PlayEnums = {
-	PLAY_1: 'o',
-	PLAY_2: 'x',
-}
 const {
 	PLAY_1,
 	PLAY_2
 } = PlayEnums
-
-function getRoomName() {
-	return Math.floor(Math.random()*10000)
-}
-
-function joinOrCreate() {
-	return Object.keys(roomList).filter(key => roomList[key].numOfPeople < 2)[0]
-}
 
 function initRoom() {
 	return {
@@ -30,14 +24,6 @@ function initCheckerbord() {
 	const checkerboard = [['','',''],['','',''],['','',''],];
 
 	return checkerboard.map(row => row.map(item => item));
-}
-
-function changePlayer(play) {
-	if(play === PLAY_1) {
-		return PLAY_2
-	} else {
-		return PLAY_1
-	}
 }
 
 function isWin(play, checkerboard) {
@@ -77,9 +63,9 @@ module.exports = function(io) {
 		console.log('connection TicTacToc server')
 		const socketID = socket.id;
 		console.log(socketID)
-		const room = joinOrCreate() || getRoomName()
+		const room = joinOrCreate(roomList) || getRoomName()
 		
-		if(joinOrCreate()) {
+		if(joinOrCreate(roomList)) {
 			socket.join(room, () => {
 				const { peopleOfRoom, nowPlayer, } = roomList[room]
 				peopleOfRoom.push(socketID)
