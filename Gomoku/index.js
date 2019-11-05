@@ -10,8 +10,6 @@ const {
 	PLAY_2
 } = PlayEnums
 
-// var player = 0
-// var chess = 'o'
 function initRoom() {
 	return {
 		peopleOfRoom: [],
