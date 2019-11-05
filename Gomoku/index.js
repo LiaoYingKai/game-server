@@ -10,8 +10,8 @@ const {
 	PLAY_2
 } = PlayEnums
 
-var player = 0
-var chess = 'o'
+// var player = 0
+// var chess = 'o'
 function initRoom() {
 	return {
 		peopleOfRoom: [],
@@ -161,6 +161,15 @@ module.exports = function(io) {
 				console.log(roomList)
 			})
 		}
+		socket.on('addChess', (chessInfo) => {
+			const {
+				play,
+				rowIndex,
+				columnIndex
+			} = chessInfo
+			roomList[room].checkerboardStatus[rowIndex][columnIndex] = play
+			io.to(room).emit('updateChess', roomList[room].checkerboardStatus)
+		})
 		// playId.push(socketID)
 		// if (playId.length === 2) {
 		// 	checkerboard = createCheckerboard()
