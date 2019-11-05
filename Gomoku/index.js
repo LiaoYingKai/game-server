@@ -15,13 +15,13 @@ function initRoom() {
 		peopleOfRoom: [],
 		nowPlayer: 0,
 		totalChess: 0,
-		checkerboardStatus: createCheckerboard(),
+		checkerboardStatus: getCheckerboard(),
 		get numOfPeople() {
 			return this.peopleOfRoom.length
 		}
 	}
 }
-function createCheckerboard() {
+function getCheckerboard() {
 	let checkerboard = []
 	for (let i = 0; i < 20; i++) {
 		checkerboard[i] = new Array()
@@ -190,13 +190,13 @@ module.exports = function(io) {
 		})
 
 		socket.on('init', () => {
-			socket.emit('init', createCheckerboard())
+			socket.emit('init', getCheckerboard())
 		})
 
 		socket.on('disconnect', (reason) => {
 			socket.leave(room)
 			io.to(room).emit('leaveGame')
-			io.to(room).emit('updateChess', createCheckerboard())
+			io.to(room).emit('updateChess', getCheckerboard())
 			delete roomList[room]
 			console.log(roomList)
 		})
