@@ -167,8 +167,19 @@ module.exports = function(io) {
 				rowIndex,
 				columnIndex
 			} = chessInfo
+			if(play !== roomList[room].nowPlayer) {
+				socket.emit('notNowPlay', '想偷吃步餒乾');
+				return 
+			}
+			if(roomList[room].checkerboardStatus[rowIndex][columnIndex]) {
+				socket.emit('multipleAdd', '沒看到有人下了喔乾');
+				return
+			}
 			roomList[room].checkerboardStatus[rowIndex][columnIndex] = play
 			io.to(room).emit('updateChess', roomList[room].checkerboardStatus)
+			// 判斷勝利
+			roomList[room].nowPlayer = changePlayer(roomList[room].nowPlayer)
+			io.to(room).emit('nowPlay', roomList[room].nowPlayer)
 		})
 		// playId.push(socketID)
 		// if (playId.length === 2) {
